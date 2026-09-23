@@ -3,19 +3,16 @@ package com.minisearch.server.controllers;
 import com.minisearch.server.services.AnalyticsService;
 import com.minisearch.server.services.IndexService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/api/analytics")
 @RequiredArgsConstructor
-public class AnalyticsController {
+public class AnalyticsController{
 
-    @Bean
     private final AnalyticsService analyticsService;
     private final IndexService indexService;
 
@@ -35,4 +32,5 @@ public class AnalyticsController {
         indexService.rebuildIndex();
         return ResponseEntity.ok(Map.of("indexed", indexService.getIndexSize()));
     }
+
 }

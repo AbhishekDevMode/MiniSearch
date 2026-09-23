@@ -2,7 +2,6 @@ package com.minisearch.server.crawler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class WebCrawler {
+public class WebCrawler{
 
     @Value("${minisearch.crawler.user-agent:MiniSearchBot/1.0}")
     private String userAgent;
