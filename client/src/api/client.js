@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 const API = axios.create({
-    baseURL: import.meta.env.API_BASE_URL || '/api',
-    timeout: 60000, // Crawling can take up to 60s
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    timeout: 60000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -14,9 +14,8 @@ export const searchApi = {
         const {data} = await API.get('/search', {
             params: {q: query, limit, offset},
         })
-        return data
+        return data;
     },
-
 
     async getSuggestions(query, limit = 5) {
         const {data} = await API.get('/search/suggestions', {
@@ -25,19 +24,16 @@ export const searchApi = {
         return data
     },
 
-
     async logClick(query, docId, position) {
         await API.post('/search/click', null, {
             params: {query, docId, position},
         })
     },
 
-
     async getStats() {
         const {data} = await API.get('/analytics/stats')
         return data
     },
-
 
     async getTrending(limit = 8) {
         const {data} = await API.get('/analytics/trending', {
@@ -45,7 +41,6 @@ export const searchApi = {
         })
         return data
     },
-
 
     async reindex() {
         const {data} = await API.post('/analytics/reindex')

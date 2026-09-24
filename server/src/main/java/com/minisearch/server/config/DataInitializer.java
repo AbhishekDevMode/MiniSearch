@@ -14,7 +14,7 @@ public class DataInitializer implements CommandLineRunner {
     private final IndexService indexService;
 
     @Override
-    public void run(String... args) {
+    public void run(String... args){
         log.info("🔧 Initializing search index from DB...");
         indexService.rebuildIndex();
         log.info("✅ Index ready: {} documents", indexService.getIndexSize());
