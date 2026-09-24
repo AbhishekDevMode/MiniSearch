@@ -18,7 +18,7 @@ public class DocumentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 2048, unique = true)
+    @Column(nullable = false, length = 500, unique = true)
     private String url;
 
     @Column(length = 500)

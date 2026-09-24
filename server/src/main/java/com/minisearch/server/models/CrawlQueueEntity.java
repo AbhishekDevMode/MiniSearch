@@ -20,10 +20,10 @@ public class CrawlQueueEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 2048, unique = true)
+    @Column(nullable = false, length = 500, unique = true)
     private String url;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     @Column(nullable=false,length=20)
     @Builder.Default
     private CrawlStatus status=CrawlStatus.PENDING;

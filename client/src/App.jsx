@@ -1,22 +1,33 @@
-import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "./components/HomePage";
-import ResultsPage from "./components/ResultsPage";
-import Footer from "./components/Footer";
+import './App.css'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import Navbar from './components/Navbar'
+import HomePage from './pages/HomePage'
+import SearchPage from './pages/SearchPage'
+import AdminPage from './pages/AdminPage'
+import Footer from './components/Footer'
+
 function App() {
+  const location = useLocation()
+  const isSearchPage = location.pathname === '/search'
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white text-gray-900">
+      {/* Show Navbar on non-search pages (search page has its own dedicated search bar header) */}
+      {!isSearchPage && <Navbar />}
 
+      <div className="flex-1 flex flex-col">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/search" element={<ResultsPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/crawler" element={<Navigate to="/admin" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <Footer />
+      </div>
 
+      <Footer />
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

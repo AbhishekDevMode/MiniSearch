@@ -3,7 +3,7 @@ package com.minisearch.server.repositories;
 import com.minisearch.server.models.CrawlQueueEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.minisearch.server.models.CrawlQueueEntity.CrawlStatus;
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 

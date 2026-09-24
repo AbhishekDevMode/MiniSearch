@@ -1,5 +1,12 @@
 package com.minisearch.server.dto.response;
 
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SearchResult {
 
     private Long docId;

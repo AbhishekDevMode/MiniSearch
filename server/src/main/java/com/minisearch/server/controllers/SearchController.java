@@ -9,27 +9,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/search")
 @RequiredArgsConstructor
-public class SearchController{
+public class SearchController {
 
-    @Autowired
     private final SearchService searchService;
-    @Autowired
-    private final SearchRequest searchRequest;
 
     @GetMapping
     public ResponseEntity<SearchResponse> quickSearch(
             @RequestParam("q") String query,
-            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+            @RequestParam(value = "limit", defaultValue = "10") int limit,
+            @RequestParam(value = "offset", defaultValue = "0") int offset) {
 
+        SearchRequest request = new SearchRequest(query, limit, offset);
+        return ResponseEntity.ok(searchService.search(request));
+    }
 
-        searchRequest.setQuery(query);
-        searchRequest.setLimit(limit);
-        searchRequest.setOffset(0);
-
-        return ResponseEntity.ok(searchService.search(searchRequest));
+    @GetMapping("/suggestions")
+    public ResponseEntity<List<String>> suggestions(
+            @RequestParam(value = "q", defaultValue = "") String query,
+            @RequestParam(value = "limit", defaultValue = "5") int limit) {
+        return ResponseEntity.ok(searchService.getSuggestions(query, limit));
     }
 
     @PostMapping

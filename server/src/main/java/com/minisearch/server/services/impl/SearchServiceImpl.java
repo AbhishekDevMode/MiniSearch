@@ -1,4 +1,6 @@
 package com.minisearch.server.services.impl;
+
+import com.minisearch.server.dto.mapper.DocumentMapper;
 import com.minisearch.server.dto.request.SearchRequest;
 import com.minisearch.server.dto.response.SearchResponse;
 import com.minisearch.server.dto.response.SearchResult;
@@ -13,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,8 +36,11 @@ public class SearchServiceImpl implements SearchService {
 
         List<BM25Ranker.ScoredDoc> scoredDocs = ranker.rank(request.getQuery());
 
-        int from = Math.min(request.getOffset() != null ? request.getOffset() : 0, scoredDocs.size());
-        int to = Math.min(from + (request.getLimit() != null ? request.getLimit() : 10), scoredDocs.size());
+        int offset = request.getOffset() != null ? request.getOffset() : 0;
+        int limit  = request.getLimit()  != null ? request.getLimit()  : 10;
+
+        int from = Math.min(offset, scoredDocs.size());
+        int to   = Math.min(from + limit, scoredDocs.size());
         List<BM25Ranker.ScoredDoc> paged = scoredDocs.subList(from, to);
 
         List<Long> docIds = paged.stream()
@@ -48,13 +55,7 @@ public class SearchServiceImpl implements SearchService {
                 .map(sd -> {
                     DocumentEntity doc = docsById.get(sd.docId());
                     if (doc == null) return null;
-                    return SearchResult.builder()
-                            .docId(doc.getId())
-                            .url(doc.getUrl())
-                            .title(doc.getTitle())
-                            .snippet(buildSnippet(doc.getContent(), request.getQuery()))
-                            .score(sd.score())
-                            .build();
+                    return DocumentMapper.toSearchResult(doc, request.getQuery(), sd.score());
                 })
                 .filter(Objects::nonNull)
                 .toList();
@@ -71,11 +72,19 @@ public class SearchServiceImpl implements SearchService {
             log.warn("Failed to log search: {}", e.getMessage());
         }
 
+        List<String> suggestions = List.of();
+        try {
+            suggestions = getSuggestions(request.getQuery(), 4);
+        } catch (Exception e) {
+            log.debug("Suggestions lookup failed: {}", e.getMessage());
+        }
+
         return SearchResponse.builder()
                 .query(request.getQuery())
                 .totalResults(scoredDocs.size())
                 .responseTimeMs(elapsed)
                 .results(results)
+                .suggestions(suggestions)
                 .build();
     }
 
@@ -89,23 +98,26 @@ public class SearchServiceImpl implements SearchService {
                 .build());
     }
 
-    private String buildSnippet(String content, String query) {
-        if (content == null || content.isBlank()) return "";
-
-        String lower = content.toLowerCase();
-        String firstTerm = query.toLowerCase().split("\\s+")[0];
-        int idx = lower.indexOf(firstTerm);
-
-        if (idx < 0) {
-            return content.substring(0, Math.min(250, content.length()))
-                    + (content.length() > 250 ? "..." : "");
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getSuggestions(String prefix, int limit) {
+        int max = limit > 0 ? limit : 5;
+        if (prefix == null || prefix.trim().isEmpty()) {
+            return searchLogRepository.findTopQueries(org.springframework.data.domain.PageRequest.of(0, max))
+                    .stream()
+                    .map(row -> (String) row[0])
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .toList();
         }
-
-        int start = Math.max(0, idx - 80);
-        int end = Math.min(content.length(), start + 250);
-
-        return (start > 0 ? "..." : "")
-                + content.substring(start, end)
-                + (end < content.length() ? "..." : "");
+        String clean = prefix.trim().toLowerCase();
+        return searchLogRepository.findTopQueries(org.springframework.data.domain.PageRequest.of(0, 50))
+                .stream()
+                .map(row -> (String) row[0])
+                .filter(q -> q != null && q.toLowerCase().contains(clean))
+                .distinct()
+                .limit(max)
+                .toList();
     }
+
 }

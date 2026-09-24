@@ -23,7 +23,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
     @Override
     public List<Map<String, Object>> getTopQueries(int limit) {
-        // Pageable is from org.springframework.data.domain — NOT java.awt.print
         Pageable page = PageRequest.of(0, limit);
 
         return searchLogRepository.findTopQueries(page)
